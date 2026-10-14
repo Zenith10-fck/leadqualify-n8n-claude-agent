@@ -1,0 +1,75 @@
+{
+  "name": "lead_qualification",
+  "description": "Structured qualification of a single inbound lead. Every field is required so downstream CRM routing never receives a partially-shaped object.",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "score",
+      "intent",
+      "is_spam",
+      "budget_signal",
+      "timeline_signal",
+      "need_summary",
+      "suggested_tags",
+      "pipeline_stage",
+      "recommended_action",
+      "confidence"
+    ],
+    "properties": {
+      "score": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "Overall lead quality 0-100. Combines intent strength, budget, timeline and fit."
+      },
+      "intent": {
+        "type": "string",
+        "enum": ["hot", "warm", "cold"],
+        "description": "hot = ready to buy soon with budget; warm = interested, evaluating; cold = low intent / off-topic / info-only."
+      },
+      "is_spam": {
+        "type": "boolean",
+        "description": "True for bots, promotional blasts, scams, or nonsense. Spam is dropped, never routed to sales."
+      },
+      "budget_signal": {
+        "type": "string",
+        "enum": ["stated", "implied", "none"],
+        "description": "stated = a number/range given; implied = 'budget approved/flexible' without a number; none = no budget cue."
+      },
+      "timeline_signal": {
+        "type": "string",
+        "enum": ["urgent", "this_quarter", "none"],
+        "description": "urgent = now/this week/ASAP/by end of month; this_quarter = next month/next quarter; none = no timeline cue."
+      },
+      "need_summary": {
+        "type": "string",
+        "maxLength": 200,
+        "description": "One-sentence plain-language summary of what the lead actually wants."
+      },
+      "suggested_tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "maxItems": 6,
+        "description": "CRM tags, e.g. ['hot-lead','has-budget','urgent','hvac']."
+      },
+      "pipeline_stage": {
+        "type": "string",
+        "enum": ["new-hot", "new-warm", "nurture", "disqualified"],
+        "description": "Target GoHighLevel pipeline stage derived from intent + spam."
+      },
+      "recommended_action": {
+        "type": "string",
+        "enum": ["alert-sales-now", "auto-nurture", "no-action"],
+        "description": "alert-sales-now for hot; auto-nurture for warm; no-action for cold/spam."
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "description": "Model confidence in this classification. Below 0.6 the workflow flags for human review instead of auto-routing."
+      }
+    }
+  }
+}

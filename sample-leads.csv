@@ -1,0 +1,41 @@
+lead_id,source,name,email,company,message,ground_truth
+L001,webform,Marcus Reid,marcus@brightpathhvac.example,Brightpath HVAC,"We need help automating our lead intake. Getting ~200 form fills/month, budget around $4k, want to start within 2 weeks. Can you jump on a call this week?",hot
+L002,webform,Dana Cho,dana.cho@meridiandental.example,Meridian Dental Group,"Looking to book more appointments. We have HighLevel already. Budget is flexible, need this live by end of month.",hot
+L003,email,Tomas Vidal,tvidal@vidalroofing.example,Vidal Roofing,"Our quote requests get lost in email. Want AI to sort and reply. Ready to pay, ~$3000, ASAP.",hot
+L004,webform,Priya Nair,priya@nairlegal.example,Nair Legal,"Interested in automating client intake forms into our CRM. When can we talk? Budget approved.",hot
+L005,email,Greg Olsen,greg@olsenplumbing.example,Olsen Plumbing,"Need to stop missing after-hours leads. Want instant text back. Have $2.5k set aside, want to start now.",hot
+L006,webform,Aisha Rahman,aisha@rahmandigital.example,Rahman Digital,"Running a marketing agency, want to resell lead automation to clients. Serious budget, let's scope a pilot this month.",hot
+L007,email,Ben Carter,ben@cartersolar.example,Carter Solar,"We get 150 leads/week and can't follow up fast enough. Want AI qualification + routing. Budget $5k. Urgent.",hot
+L008,webform,Lena Fischer,lena@fischerfitness.example,Fischer Fitness Studios,"Want to auto-qualify gym membership inquiries and push hot ones to sales. Ready to move, ~$3.5k.",hot
+L009,webform,Raj Patel,raj@patelrealty.example,Patel Realty,"Interested in a lead scoring setup for property inquiries. Have budget, want to see a demo first then start.",warm
+L010,email,Sophie Laurent,sophie@laurentspa.example,Laurent Spa,"Curious about automating our booking inquiries. Not sure on budget yet, exploring options for next quarter.",warm
+L011,webform,Kevin Zhang,kevin@zhangaccounting.example,Zhang Accounting,"We might want AI to sort incoming client emails. Still early, comparing a few providers.",warm
+L012,webform,Maria Gomez,maria@gomezevents.example,Gomez Events,"Looking into automating RSVP and inquiry handling. Would like a proposal to review internally.",warm
+L013,email,Daniel Wright,dan@wrightconsulting.example,Wright Consulting,"Exploring lead automation. Need to understand pricing before committing. No firm timeline.",warm
+L014,webform,Nina Kowalski,nina@kowalskidesign.example,Kowalski Design,"Interested in learning more about AI intake. We're a small studio, budget is modest.",warm
+L015,webform,Omar Haddad,omar@haddadautos.example,Haddad Auto Group,"Want to see how AI could handle test-drive requests. Just gathering info right now.",warm
+L016,email,Grace Lin,grace@lintutoring.example,Lin Tutoring,"Considering automating parent inquiries. Would need something simple. Maybe next month.",warm
+L017,webform,Paul Adebayo,paul@adebayologistics.example,Adebayo Logistics,"Heard AI can help with lead follow-up. Not sure if it fits us. Open to a conversation eventually.",warm
+L018,webform,Emma Novak,emma@novakphoto.example,Novak Photography,"Do you offer inquiry automation? Just curious what it involves, no rush.",cold
+L019,email,Student Researcher,jsmith@university.edu,University Project,"Hi, I'm a student researching AI automation tools for a class assignment. Could you explain how your system works?",cold
+L020,webform,Anon Visitor,test@test.com,,"just looking",cold
+L021,webform,Carlos Mendez,carlos@mendezbakery.example,Mendez Bakery,"Do you do social media? We mostly need Instagram help not automation.",cold
+L022,email,Hannah Brooks,hannah@brooksblog.example,Brooks Blog,"I write about tech. Would love to interview you for my blog about AI trends.",cold
+L023,webform,Ivan Petrov,ivan@petrovart.example,Petrov Art,"Not looking to buy, just wanted to say the website looks nice.",cold
+L024,webform,Unknown,noname@gmail.com,,"How much does it cost? thats all",cold
+L025,email,Freelance Dev,dev@devforhire.net,Self,"I'm a developer looking for subcontract work, not a client. Do you outsource?",cold
+L026,webform,SEO Services,contact@rankfast-seo.biz,RankFast,"We can get your website to #1 on Google guaranteed! Reply to claim your free audit now!!!",spam
+L027,email,Crypto Invest,winner@luckydraw-crypto.info,,"Congratulations you have been selected for a $10,000 crypto reward. Click here to claim: bit.ly/xy12z",spam
+L028,webform,aaa aaa,asdf@asdf.com,,"asdfasdf asdf asdf test test lorem ipsum",spam
+L029,email,Marketing Blast,noreply@cheapleads-bulk.ru,BulkLeads,"Buy 10,000 verified email leads for $99. Limited time offer, act now!",spam
+L030,webform,Loan Offer,fastcash@quickloans24.biz,,"Need cash fast? Get approved for a $50k loan in minutes no credit check!",spam
+L031,email,Viktor S,v.spam@mailer-daemon.xyz,,"Increase your sales 500% with our secret method. DM me for details.",spam
+L032,webform,,promo@dealsdealsdeals.info,,"FREE FREE FREE click now win big prize hurry offer ends today",spam
+L033,webform,Oliver Bennett,oliver@bennettclinic.example,Bennett Clinic,"We're a busy clinic missing patient callbacks. Want automated triage of inquiries. Budget ~$3k, hoping to start in 3 weeks.",hot
+L034,email,Chloe Turner,chloe@turnerfinance.example,Turner Finance,"Need to route incoming loan inquiries by urgency into our CRM. We use GoHighLevel. Ready to begin, budget confirmed.",hot
+L035,webform,Sam O'Neill,sam@oneillfitness.example,O'Neill Fitness,"Interested in your automation but need to check with my partner first. Might decide in a few weeks.",warm
+L036,email,Julia Meyer,julia@meyerbakes.example,Meyer Bakes,"We get catering inquiries by email and lose track. Curious if AI helps. No budget set yet.",warm
+L037,webform,Andre Silva,andre@silvaconstruction.example,Silva Construction,"Want AI to qualify project inquiries and alert my team for big jobs. Budget $4k, want to start this month.",hot
+L038,webform,Rebecca Hall,rebecca@hallboutique.example,Hall Boutique,"Just wondering if you do e-commerce chatbots. Not really automation. Probably not a fit.",cold
+L039,email,Malik Johnson,malik@johnsonlaw.example,Johnson Law,"Exploring options to auto-sort case inquiries. Would like to understand your approach and pricing first.",warm
+L040,webform,Prize Winner,claim@yourprize-now.info,,"YOU WON! Claim your iPhone 15 now, just pay shipping. Click the link!",spam

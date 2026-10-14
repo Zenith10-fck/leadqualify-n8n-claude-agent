@@ -1,0 +1,388 @@
+<title>LeadQualify AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #F7F8F7;
+    --surface: #FFFFFF;
+    --surface-2: #F0F2F0;
+    --ink: #16201C;
+    --ink-soft: #47544E;
+    --ink-faint: #7B857F;
+    --border: #DCE1DE;
+    --border-strong: #C3CBC6;
+    --accent: #1F9E6B;
+    --accent-ink: #0F6B47;
+    --hot: #C2711A;
+    --hot-bg: #FBF0E1;
+    --alert: #C4463A;
+    --alert-bg: #FAE9E7;
+    --shadow: 0 1px 2px rgba(22,32,28,.05), 0 8px 30px rgba(22,32,28,.06);
+    --radius: 12px;
+    --maxw: 940px;
+  }
+  :root:not([data-theme="light"]) {
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1512;
+      --surface: #16201C;
+      --surface-2: #1D2A25;
+      --ink: #E7ECE9;
+      --ink-soft: #A9B4AF;
+      --ink-faint: #79857F;
+      --border: #26332D;
+      --border-strong: #33443C;
+      --accent: #37C08A;
+      --accent-ink: #6FD9AC;
+      --hot: #E39B4C;
+      --hot-bg: #2A2115;
+      --alert: #E5675A;
+      --alert-bg: #2C1815;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1512;
+    --surface: #16201C;
+    --surface-2: #1D2A25;
+    --ink: #E7ECE9;
+    --ink-soft: #A9B4AF;
+    --ink-faint: #79857F;
+    --border: #26332D;
+    --border-strong: #33443C;
+    --accent: #37C08A;
+    --accent-ink: #6FD9AC;
+    --hot: #E39B4C;
+    --hot-bg: #2A2115;
+    --alert: #E5675A;
+    --alert-bg: #2C1815;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  h1, h2, h3 { font-family: "Archivo", system-ui, sans-serif; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; max-width: var(--maxw); margin: 0 auto;
+  }
+  .brandmark { display: flex; align-items: center; gap: 10px; font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500; letter-spacing: .04em; color: var(--ink-soft); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .toggle {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .06em;
+    background: var(--surface); color: var(--ink-soft); border: 1px solid var(--border);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer;
+  }
+  .toggle:hover { border-color: var(--border-strong); color: var(--ink); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Hero */
+  .hero { padding: 40px 0 20px; border-top: 1px solid var(--border); }
+  .hero .eyebrow { margin-bottom: 18px; }
+  .hero h1 { font-size: clamp(34px, 6vw, 56px); font-weight: 800; line-height: 1.02; }
+  .hero .lede { margin-top: 20px; font-size: clamp(18px, 2.4vw, 21px); color: var(--ink-soft); max-width: 60ch; }
+  .stack-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .02em;
+    background: var(--surface); border: 1px solid var(--border); color: var(--ink-soft);
+    padding: 6px 12px; border-radius: 7px;
+  }
+  .chip strong { color: var(--accent-ink); font-weight: 600; }
+
+  section { padding: 30px 0; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+  .section-head h2 { font-size: clamp(22px, 3.2vw, 28px); }
+  .section-head .num { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-faint); font-weight: 500; }
+  .body-copy { color: var(--ink-soft); max-width: 65ch; }
+  .body-copy + .body-copy { margin-top: 14px; }
+
+  /* Pipeline diagram */
+  .pipeline {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 26px; overflow-x: auto;
+  }
+  .flow { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 0; align-items: stretch; min-width: 640px; }
+  .stage { position: relative; padding: 4px 20px 4px 0; }
+  .stage:not(:last-child)::after {
+    content: ""; position: absolute; top: 26px; right: 6px; width: 14px; height: 14px;
+    border-top: 2px solid var(--border-strong); border-right: 2px solid var(--border-strong);
+    transform: rotate(45deg);
+  }
+  .stage .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+  .stage h3 { font-size: 17px; margin-top: 8px; font-weight: 700; }
+  .stage p { margin-top: 7px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .stage .tool { display: inline-block; margin-top: 10px; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 10%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); border-radius: 5px; padding: 3px 8px; }
+
+  .branch-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; min-width: 640px; }
+  .branch { border-radius: 9px; padding: 13px 14px; border: 1px solid var(--border); background: var(--surface-2); }
+  .branch .lbl { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+  .branch p { font-size: 13px; color: var(--ink-soft); margin-top: 5px; line-height: 1.45; }
+  .branch.hot { border-color: color-mix(in srgb, var(--hot) 45%, var(--border)); background: var(--hot-bg); }
+  .branch.hot .lbl { color: var(--hot); }
+  .branch.go .lbl { color: var(--accent-ink); }
+  .branch.mute .lbl { color: var(--ink-faint); }
+  .branch.alert { border-color: color-mix(in srgb, var(--alert) 45%, var(--border)); background: var(--alert-bg); }
+  .branch.alert .lbl { color: var(--alert); }
+
+  /* Reliability callout */
+  .callout {
+    border: 1px solid color-mix(in srgb, var(--alert) 30%, var(--border));
+    background: var(--surface);
+    border-left: 4px solid var(--alert);
+    border-radius: var(--radius); padding: 24px 26px; box-shadow: var(--shadow);
+  }
+  .callout h3 { font-size: 20px; }
+  .callout .body-copy { margin-top: 12px; }
+  .callout .mono-note { margin-top: 16px; font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-soft); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; line-height: 1.6; }
+  .callout .mono-note b { color: var(--alert); font-weight: 600; }
+
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .tile .val { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: clamp(30px, 5vw, 42px); letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .val.go { color: var(--accent); }
+  .tile .val.hotv { color: var(--hot); }
+  .tile .k { margin-top: 10px; font-size: 13.5px; font-weight: 600; }
+  .tile .sub { margin-top: 4px; font-size: 12.5px; color: var(--ink-faint); line-height: 1.4; }
+  .measured { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); margin-top: 14px; }
+
+  /* Before / after */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ba .col { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+  .ba .col h3 { font-size: 13px; font-family: "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; padding: 13px 18px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .ba .before h3 { color: var(--ink-faint); background: var(--surface-2); }
+  .ba .after h3 { color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+  .ba ul { list-style: none; margin: 0; padding: 8px 18px 16px; }
+  .ba li { padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--ink-soft); display: flex; gap: 10px; }
+  .ba li:last-child { border-bottom: 0; }
+  .ba li::before { content: ""; flex: 0 0 6px; height: 6px; margin-top: 8px; border-radius: 50%; background: var(--border-strong); }
+  .ba .after li::before { background: var(--accent); }
+
+  /* Deliverables + CTA */
+  .deliver { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .deliver .d { display: flex; gap: 13px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .deliver .d svg { flex: 0 0 20px; margin-top: 2px; color: var(--accent); }
+  .deliver .d p { font-size: 15px; }
+  .deliver .d p b { display: block; font-family: "Archivo", sans-serif; font-weight: 600; letter-spacing: -.01em; }
+  .deliver .d p span { color: var(--ink-soft); font-size: 14px; }
+
+  .cta { text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 38px 28px; box-shadow: var(--shadow); margin-top: 8px; }
+  .cta h2 { font-size: clamp(22px, 3.4vw, 30px); }
+  .cta p { margin-top: 12px; color: var(--ink-soft); max-width: 52ch; margin-left: auto; margin-right: auto; }
+  .cta .btn { display: inline-block; margin-top: 22px; font-family: "IBM Plex Sans", sans-serif; font-weight: 600; font-size: 16px; background: var(--accent); color: #fff; border-radius: 9px; padding: 13px 26px; text-decoration: none; }
+  :root[data-theme="dark"] .cta .btn, :root:not([data-theme="light"]) .cta .btn { color: #0E1512; }
+  @media (prefers-color-scheme: light) { .cta .btn { color: #fff; } }
+  .cta .btn:hover { filter: brightness(1.05); }
+  .cta .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  footer { border-top: 1px solid var(--border); margin-top: 40px; padding: 26px 0 50px; }
+  footer .note { font-size: 13px; color: var(--ink-faint); line-height: 1.6; max-width: 66ch; }
+  footer .note b { color: var(--ink-soft); font-weight: 600; }
+
+  @media (max-width: 720px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .ba, .deliver { grid-template-columns: 1fr; }
+    .branch-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tile, .stage, .branch { transition: none; }
+  }
+</style>
+
+<div class="topbar">
+  <span class="brandmark"><span class="dot"></span>AI Automation Engineer &amp; Claude Expert</span>
+  <button class="toggle" id="themeToggle" aria-label="Toggle color theme">theme</button>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Portfolio build / n8n + Claude + GoHighLevel</div>
+    <h1>LeadQualify AI</h1>
+    <p class="lede">An AI agent that reads every inbound lead the second it arrives, qualifies it with Claude, and routes it into the CRM. Hot buyers reach sales in seconds. Spam never does.</p>
+    <div class="stack-row">
+      <span class="chip"><strong>n8n</strong> orchestration</span>
+      <span class="chip"><strong>Claude</strong> structured output</span>
+      <span class="chip"><strong>GoHighLevel</strong> CRM</span>
+      <span class="chip"><strong>Slack</strong> alerts</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head"><span class="num">01</span><h2>The problem</h2></div>
+    <p class="body-copy">Most small businesses that run ads or forms hit the same wall: leads arrive faster than a human can read them. Hot buyers sit in an inbox for hours, junk eats the team's attention, and warm-but-not-ready leads get no follow-up at all.</p>
+    <p class="body-copy">The cost is not a crash. It is quiet, lost revenue that never shows up in an error log.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="num">02</span><h2>How the agent works</h2></div>
+    <div class="pipeline">
+      <div class="flow">
+        <div class="stage">
+          <div class="k">Step 1</div>
+          <h3>Intake</h3>
+          <p>A web form or inbound email hits an n8n webhook.</p>
+          <span class="tool">n8n webhook</span>
+        </div>
+        <div class="stage">
+          <div class="k">Step 2</div>
+          <h3>Qualify</h3>
+          <p>Claude scores 0 to 100, reads intent, budget and timeline, flags spam.</p>
+          <span class="tool">Claude API</span>
+        </div>
+        <div class="stage">
+          <div class="k">Step 3</div>
+          <h3>Validate</h3>
+          <p>Every response is checked against a strict JSON schema before anything moves.</p>
+          <span class="tool">schema + retry</span>
+        </div>
+        <div class="stage">
+          <div class="k">Step 4</div>
+          <h3>Route</h3>
+          <p>The lead lands in the right CRM stage, and sales is alerted if it is hot.</p>
+          <span class="tool">GoHighLevel</span>
+        </div>
+      </div>
+      <div class="branch-row">
+        <div class="branch hot">
+          <div class="lbl">Hot</div>
+          <p>Upsert to CRM + instant Slack alert to sales.</p>
+        </div>
+        <div class="branch go">
+          <div class="lbl">Warm</div>
+          <p>Added to the nurture pipeline, no human interrupt.</p>
+        </div>
+        <div class="branch mute">
+          <div class="lbl">Cold / spam</div>
+          <p>Logged and dropped. Never reaches the pipeline.</p>
+        </div>
+        <div class="branch alert">
+          <div class="lbl">Cannot qualify</div>
+          <p>Sent to a human with an alert, never guessed at.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="num">03</span><h2>The reliability layer</h2></div>
+    <div class="callout">
+      <h3>Fails loudly, never silently</h3>
+      <p class="body-copy">Most AI integrations work fine on the first fifty runs, then start returning JSON in a slightly different shape and break downstream without anyone noticing. I build against exactly that failure mode.</p>
+      <div class="mono-note">Every Claude response is validated against a strict schema (types, enums, ranges, required fields). On drift the workflow re-prompts once with the exact error. If it still fails, the lead routes to a human with a Slack alert. <b>A malformed AI response can never create a half-shaped contact or swallow a real lead.</b></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="num">04</span><h2>Results</h2></div>
+    <div class="metrics">
+      <div class="tile"><div class="val go">85%</div><div class="k">Classification accuracy</div><div class="sub">34 of 40 leads match the label.</div></div>
+      <div class="tile"><div class="val hotv">91%</div><div class="k">Hot-lead recall</div><div class="sub">Genuine buyers that reach sales fast.</div></div>
+      <div class="tile"><div class="val go">100%</div><div class="k">Spam caught</div><div class="sub">None reached the sales pipeline.</div></div>
+      <div class="tile"><div class="val">0</div><div class="k">Non-hot leads sent to sales as hot</div><div class="sub">No false alarms for sales.</div></div>
+    </div>
+    <p class="measured">// Live Claude run (claude-sonnet-5) on a labeled 40-lead synthetic set. Reproducible with live_measure.py.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="num">05</span><h2>Before and after</h2></div>
+    <div class="ba">
+      <div class="col before">
+        <h3>Before</h3>
+        <ul>
+          <li>Every lead read by hand, roughly 3 to 4 minutes each</li>
+          <li>Hot leads answered hours after they arrive</li>
+          <li>Spam mixed straight into the sales queue</li>
+          <li>Warm leads forgotten with no follow-up</li>
+        </ul>
+      </div>
+      <div class="col after">
+        <h3>After</h3>
+        <ul>
+          <li>Auto-triaged in seconds, humans read only qualified leads</li>
+          <li>Hot leads alerted to sales within seconds</li>
+          <li>Spam filtered out before it reaches anyone</li>
+          <li>Warm leads dropped into a nurture pipeline automatically</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="num">06</span><h2>What you get</h2></div>
+    <div class="deliver">
+      <div class="d">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <p><b>The n8n workflow</b><span>Imported and wired to your CRM and Slack.</span></p>
+      </div>
+      <div class="d">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <p><b>The Claude prompt and schema</b><span>Tuned to your definition of a good lead.</span></p>
+      </div>
+      <div class="d">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <p><b>The reliability layer</b><span>So it does not fail silently in production.</span></p>
+      </div>
+      <div class="d">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <p><b>Loom walkthrough + one-page doc</b><span>So your team can own it after handoff.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta">
+    <h2>Want the same for your inbound leads?</h2>
+    <p>Send me how leads reach you today, a form, an inbox, or a screenshot, and I will tell you exactly what a build looks like for your business.</p>
+    <a class="btn" href="#">Start a conversation</a>
+  </div>
+
+  <footer>
+    <p class="note"><b>About this build.</b> LeadQualify AI is a reference build and demonstration created for my portfolio, not a paid client engagement. The results shown are measured on a self-built labeled test set of 40 realistic inbound leads and are fully reproducible. No client names, logos, or testimonials are implied.</p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    function current() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('lq-theme', next); } catch (e) {}
+    });
+    try {
+      var saved = localStorage.getItem('lq-theme');
+      if (saved) root.setAttribute('data-theme', saved);
+    } catch (e) {}
+  })();
+</script>

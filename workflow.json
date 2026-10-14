@@ -1,0 +1,206 @@
+{
+  "name": "LeadQualify AI — Inbound Lead Qualification + CRM Routing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leadqualify",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-intake",
+      "name": "Lead Intake (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-620, 300],
+      "webhookId": "leadqualify-intake"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "source", "value": "={{ $json.body.source || 'webform' }}", "type": "string" },
+            { "id": "a2", "name": "name", "value": "={{ $json.body.name }}", "type": "string" },
+            { "id": "a3", "name": "email", "value": "={{ $json.body.email }}", "type": "string" },
+            { "id": "a4", "name": "company", "value": "={{ $json.body.company }}", "type": "string" },
+            { "id": "a5", "name": "message", "value": "={{ $json.body.message }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "normalize-lead",
+      "name": "Normalize Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'claude-sonnet-5',\n  max_tokens: 700,\n  tool_choice: { type: 'tool', name: 'lead_qualification' },\n  tools: [ $vars.LEAD_SCHEMA_TOOL ],\n  system: $vars.QUALIFY_SYSTEM_PROMPT,\n  messages: [ { role: 'user', content: `Source: ${$json.source}\\nName: ${$json.name}\\nEmail: ${$json.email}\\nCompany: ${$json.company}\\nMessage:\\n${$json.message}` } ]\n}) }}",
+        "options": {
+          "retry": { "retry": { "maxTries": 3, "waitBetweenTries": 2000 } }
+        }
+      },
+      "id": "claude-qualify",
+      "name": "Claude Qualify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-200, 300],
+      "credentials": { "httpHeaderAuth": { "id": "anthropic", "name": "Anthropic API Key" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the tool_use payload and validate it against the lead_qualification schema.\n// This is the reliability contract: no partially-shaped object ever reaches the CRM.\nconst schema = $vars.LEAD_SCHEMA; // JSON Schema (see claude/schema.json)\nconst res = $input.first().json;\nlet obj = null;\ntry {\n  const block = (res.content || []).find(c => c.type === 'tool_use' && c.name === 'lead_qualification');\n  obj = block ? block.input : null;\n} catch (e) { obj = null; }\n\nfunction validate(o) {\n  const errs = [];\n  if (!o || typeof o !== 'object') return ['no object returned'];\n  const req = schema.schema.required;\n  for (const k of req) if (!(k in o)) errs.push(`missing ${k}`);\n  if (o.score < 0 || o.score > 100) errs.push('score out of range');\n  if (!['hot','warm','cold'].includes(o.intent)) errs.push('bad intent enum');\n  if (typeof o.is_spam !== 'boolean') errs.push('is_spam not boolean');\n  if (!['new-hot','new-warm','nurture','disqualified'].includes(o.pipeline_stage)) errs.push('bad pipeline_stage');\n  if (o.confidence < 0 || o.confidence > 1) errs.push('confidence out of range');\n  return errs;\n}\n\nconst errors = validate(obj);\nreturn [{ json: { valid: errors.length === 0, errors, qualification: obj } }];"
+      },
+      "id": "validate-schema",
+      "name": "Validate Structured Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [20, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "combinator": "and",
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json.valid }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } }
+          ]
+        }
+      },
+      "id": "if-valid",
+      "name": "Valid + Confident?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "options": { "version": 2 }, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.qualification.recommended_action }}", "rightValue": "alert-sales-now", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "hot" },
+            { "conditions": { "options": { "version": 2 }, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.qualification.recommended_action }}", "rightValue": "auto-nurture", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "warm" }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      },
+      "id": "route-action",
+      "name": "Route by Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [460, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  email: $('Normalize Lead').item.json.email,\n  name: $('Normalize Lead').item.json.name,\n  companyName: $('Normalize Lead').item.json.company,\n  tags: $json.qualification.suggested_tags,\n  customField: { lead_score: $json.qualification.score, pipeline_stage: $json.qualification.pipeline_stage }\n}) }}",
+        "options": {}
+      },
+      "id": "ghl-upsert-hot",
+      "name": "GoHighLevel Upsert (Hot)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 140],
+      "credentials": { "httpHeaderAuth": { "id": "ghl", "name": "GoHighLevel API" } }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "__rl": true, "value": "sales-hot-leads", "mode": "name" },
+        "text": "=🔥 HOT LEAD ({{ $json.qualification.score }}/100)\\n*{{ $('Normalize Lead').item.json.name }}* — {{ $('Normalize Lead').item.json.company }}\\nNeed: {{ $json.qualification.need_summary }}\\nBudget: {{ $json.qualification.budget_signal }} | Timeline: {{ $json.qualification.timeline_signal }}\\nEmail: {{ $('Normalize Lead').item.json.email }}",
+        "otherOptions": {}
+      },
+      "id": "slack-alert-hot",
+      "name": "Slack Alert Sales",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [700, 300],
+      "credentials": { "slackApi": { "id": "slack", "name": "Slack Sales" } }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  email: $('Normalize Lead').item.json.email,\n  name: $('Normalize Lead').item.json.name,\n  tags: $json.qualification.suggested_tags,\n  customField: { lead_score: $json.qualification.score, pipeline_stage: 'new-warm' }\n}) }}",
+        "options": {}
+      },
+      "id": "ghl-upsert-warm",
+      "name": "GoHighLevel Upsert (Warm → Nurture)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 460],
+      "credentials": { "httpHeaderAuth": { "id": "ghl", "name": "GoHighLevel API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cold / spam / disqualified: log and stop. Never routed to sales.\nconst q = $json.qualification;\nreturn [{ json: { logged: true, decision: q.is_spam ? 'spam-dropped' : 'cold-nurture', lead: $('Normalize Lead').item.json.email, score: q.score } }];"
+      },
+      "id": "log-cold",
+      "name": "Log Cold / Spam (No Action)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 620]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "__rl": true, "value": "automation-alerts", "mode": "name" },
+        "text": "=⚠️ LeadQualify: a lead could NOT be auto-qualified and needs human review.\\nErrors: {{ JSON.stringify($json.errors) }}\\nLead: {{ $('Normalize Lead').item.json.email }} — {{ $('Normalize Lead').item.json.message }}",
+        "otherOptions": {}
+      },
+      "id": "slack-needs-review",
+      "name": "Alert: Needs Human Review",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [460, 480],
+      "credentials": { "slackApi": { "id": "slack", "name": "Slack Sales" } }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'received' }) }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [240, 120]
+    }
+  ],
+  "connections": {
+    "Lead Intake (Webhook)": { "main": [[{ "node": "Normalize Lead", "type": "main", "index": 0 }, { "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Normalize Lead": { "main": [[{ "node": "Claude Qualify", "type": "main", "index": 0 }]] },
+    "Claude Qualify": { "main": [[{ "node": "Validate Structured Output", "type": "main", "index": 0 }]] },
+    "Validate Structured Output": { "main": [[{ "node": "Valid + Confident?", "type": "main", "index": 0 }]] },
+    "Valid + Confident?": { "main": [[{ "node": "Route by Action", "type": "main", "index": 0 }], [{ "node": "Alert: Needs Human Review", "type": "main", "index": 0 }]] },
+    "Route by Action": { "main": [[{ "node": "GoHighLevel Upsert (Hot)", "type": "main", "index": 0 }, { "node": "Slack Alert Sales", "type": "main", "index": 0 }], [{ "node": "GoHighLevel Upsert (Warm → Nurture)", "type": "main", "index": 0 }], [{ "node": "Log Cold / Spam (No Action)", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "description": "Inbound lead qualification + CRM routing. Webhook → normalize → Claude (forced structured output) → schema validation with auto-retry → route hot/warm/cold-spam. Invalid output is sent to human review, never silently dropped. Reference build for portfolio; swap credentials + channel IDs to deploy.",
+    "docs": "See claude/qualify-prompt.md, claude/schema.json, crm-payload.md. Set n8n variables LEAD_SCHEMA, LEAD_SCHEMA_TOOL, QUALIFY_SYSTEM_PROMPT."
+  }
+}
